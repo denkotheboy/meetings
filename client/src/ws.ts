@@ -8,7 +8,7 @@ export class Ws {
   messages$ = this._messages$.asObservable();
 
   constructor() {
-    this._socket = new WebSocket("wss://localhost/api");
+    this._socket = new WebSocket(`wss://${window.location.host}/api/`);
 
     this._socket.addEventListener("message", (message) => {
       this._messages$.next(message.data);
