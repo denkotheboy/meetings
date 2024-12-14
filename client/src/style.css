@@ -1,0 +1,17 @@
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.video {
+  padding: 5px;
+  display: flex;
+  gap: 10px;
+}
+
+.video > * {
+  max-height: 50%;
+  max-width: 50%;
+}
