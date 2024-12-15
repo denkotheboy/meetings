@@ -49,8 +49,20 @@ export class RTC {
     };
   }
 
+  get remoteDescription() {
+    return this._peerConnection.remoteDescription;
+  }
+
+  get localDescription() {
+    return this._peerConnection.localDescription;
+  }
+
   createOffer(options?: RTCOfferOptions) {
     return this._peerConnection.createOffer(options);
+  }
+
+  createAnswer(options?: RTCAnswerOptions) {
+    return this._peerConnection.createAnswer(options);
   }
 
   createRTCIceCandidate(candidateInitDict?: RTCIceCandidateInit) {

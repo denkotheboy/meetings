@@ -46,7 +46,16 @@ async function init() {
 
     if (data.sdp) {
       console.log("sdp", data.sdp);
-      void rtc.setRemoteDescription(rtc.createRTCSessionDescription(data.sdp));
+      void rtc
+        .setRemoteDescription(rtc.createRTCSessionDescription(data.sdp))
+        .then(() => {
+          if (rtc.remoteDescription?.type === "offer") {
+            rtc
+              .createAnswer()
+              .then((answer) => rtc.setLocalDescription(answer))
+              .then(() => ws.send({ sdp: rtc.localDescription }));
+          }
+        });
     } else if (data.candidate) {
       console.log("candidate", data.candidate);
       void rtc.addIceCandidate(rtc.createRTCIceCandidate(data.candidate));
