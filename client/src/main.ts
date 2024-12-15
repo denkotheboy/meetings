@@ -29,6 +29,7 @@ async function init() {
   });
 
   rtc.stream$.subscribe((stream) => {
+    console.log(stream);
     video2.srcObject = stream[0];
   });
 
