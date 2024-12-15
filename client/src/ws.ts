@@ -1,21 +1,14 @@
-import { Subject } from "rxjs";
+import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 
 type TMessage = Parameters<WebSocket["send"]>[0];
 
 export class Ws {
-  private _socket: WebSocket;
-  private _messages$ = new Subject<TMessage>();
-  messages$ = this._messages$.asObservable();
-
-  constructor() {
-    this._socket = new WebSocket(`wss://${window.location.host}/ws/`);
-
-    this._socket.addEventListener("message", (message) => {
-      this._messages$.next(message.data);
-    });
-  }
+  private _socket: WebSocketSubject<TMessage> = webSocket(
+    `wss://${window.location.host}/ws/`,
+  );
+  messages$ = this._socket.asObservable();
 
   send(msg: TMessage) {
-    this._socket.send(msg);
+    return this._socket.next(msg);
   }
 }
