@@ -17,8 +17,10 @@ export class RTC {
             "stun:stun.l.google.com:19302",
             "stun:stun1.l.google.com:19302",
             "stun:stun2.l.google.com:19302",
-            "stun:turn.kondratevs.ru:3478",
           ],
+        },
+        {
+          urls: ["stun:turn.kondratevs.ru:3478"],
         },
         {
           urls: "turns:turn.kondratevs.ru:5349",
