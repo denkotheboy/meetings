@@ -7,7 +7,13 @@ export class Camera {
 
   async start() {
     this._stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+      video: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        frameRate: { ideal: 30, max: 60 },
+        aspectRatio: 16 / 9,
+        facingMode: "user",
+      },
       audio: true,
     });
 
