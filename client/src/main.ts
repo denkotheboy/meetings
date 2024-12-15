@@ -29,20 +29,16 @@ async function init() {
   });
 
   rtc.stream$.subscribe((stream) => {
-    console.log(stream);
     video.srcObject = stream[0];
   });
 
   ws.messages$.subscribe(async (message) => {
     let data: any;
-    console.log("message", message);
     if (typeof message === "string") {
       data = JSON.parse(message);
     } else if (message instanceof Blob) {
       data = JSON.parse(await message.text());
     }
-
-    console.log("data", data, typeof data);
 
     if (data.sdp) {
       console.log("sdp", data.sdp);
