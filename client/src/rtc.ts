@@ -17,7 +17,13 @@ export class RTC {
             "stun:stun.l.google.com:19302",
             "stun:stun1.l.google.com:19302",
             "stun:stun2.l.google.com:19302",
+            "stun:turn.kondratevs.ru/turn-tcp/",
           ],
+        },
+        {
+          urls: "turns:turn.kondratevs.ru/turn-tls/",
+          username: "testuser",
+          credential: "testpassword",
         },
       ],
     });

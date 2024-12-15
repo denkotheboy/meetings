@@ -12,6 +12,7 @@ services:
     depends_on:
       - client
       - server
+      - coturn
 
   server:
     container_name: server
@@ -30,3 +31,19 @@ services:
       dockerfile: docker/client.Dockerfile
     expose:
       - "80"
+
+  coturn:
+    image: coturn/coturn
+    container_name: coturn
+    expose:
+      - "3478"
+      - "5349"
+    volumes:
+      - "~/certs:/etc/coturn/certs:ro"
+    command:
+      - --log-file=stdout
+      - --lt-cred-mech
+      - --realm=example.com
+      - --user=testuser:testpassword
+      - --fingerprint
+      - --external-ip=77.222.32.57
