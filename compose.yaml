@@ -35,15 +35,17 @@ services:
   coturn:
     image: coturn/coturn
     container_name: coturn
-    expose:
-      - "3478"
-      - "5349"
+    ports:
+      - "3478:3478"
+      - "5349:5349"
     volumes:
       - "~/certs:/etc/coturn/certs:ro"
     command:
       - --log-file=stdout
       - --lt-cred-mech
-      - --realm=example.com
+      - --realm=kondratevs.ru
       - --user=testuser:testpassword
       - --fingerprint
       - --external-ip=77.222.32.57
+      - --listening-port=3478
+      - --tls-listening-port=5349
