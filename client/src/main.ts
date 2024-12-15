@@ -17,7 +17,7 @@ async function init() {
   // const recorder = new Recorder(stream);
   const rtc = new RTC();
 
-  video.srcObject = stream;
+  video2.srcObject = stream;
 
   camera.tracks?.forEach((track) => {
     console.log(track);
@@ -30,7 +30,7 @@ async function init() {
 
   rtc.stream$.subscribe((stream) => {
     console.log(stream);
-    video2.srcObject = stream[0];
+    video.srcObject = stream[0];
   });
 
   ws.messages$.subscribe(async (message) => {
