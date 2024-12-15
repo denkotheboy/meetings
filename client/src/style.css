@@ -5,17 +5,22 @@ body {
   align-items: center;
 }
 
-.video {
+.video_container {
   padding: 5px;
   display: flex;
   gap: 10px;
 }
 
-.video > * {
-  max-height: 50%;
-  max-width: 50%;
+.video {
+  flex: 1;
+  max-width: 400px;
+  max-height: 400px;
+  overflow: hidden;
 }
 
 video {
+  width: 100%;          /* Растягиваем видео на всю ширину контейнера */
+  height: 100%;         /* Растягиваем видео на всю высоту контейнера */
+  object-fit: cover;    /* Обеспечивает обрезку видео, чтобы оно заполнило контейнер */
   transform: scaleX(-1);
 }
