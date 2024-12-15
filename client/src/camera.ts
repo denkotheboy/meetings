@@ -8,7 +8,7 @@ export class Camera {
   async start() {
     this._stream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: false,
+      audio: true,
     });
 
     return this._stream;
