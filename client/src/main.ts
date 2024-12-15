@@ -34,10 +34,11 @@ async function init() {
 
   ws.messages$.subscribe(async (message) => {
     let data: any;
+    console.log(message);
     if (typeof message === "string") {
       data = JSON.parse(message);
-    } else if (typeof message === "object") {
-      data = JSON.parse(await (message as Blob).text());
+    } else if (message instanceof Blob) {
+      data = JSON.parse(await message.text());
     }
 
     if (data.sdp) {
