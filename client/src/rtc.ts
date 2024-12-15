@@ -59,6 +59,8 @@ export class RTC {
   }
 
   addIceCandidate(candidate: RTCIceCandidateInit) {
-    return this._peerConnection.addIceCandidate(candidate);
+    return this._peerConnection
+      .addIceCandidate(candidate)
+      .catch((error) => console.error("Ошибка добавления кандидата:", error));
   }
 }
