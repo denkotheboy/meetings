@@ -39,7 +39,7 @@ async function init() {
     if (typeof message === "string") {
       data = JSON.parse(message);
     } else if (message instanceof Blob) {
-      data = JSON.parse(await message.text());
+      data = JSON.parse(JSON.parse(await message.text()));
     }
 
     console.log("data", data);
