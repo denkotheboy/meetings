@@ -39,10 +39,10 @@ async function init() {
     if (typeof message === "string") {
       data = JSON.parse(message);
     } else if (message instanceof Blob) {
-      data = JSON.parse(JSON.parse(await message.text()));
+      data = JSON.parse(await message.text());
     }
 
-    console.log("data", data);
+    console.log("data", data, typeof data);
 
     if (data.sdp) {
       console.log("sdp", data.sdp);
@@ -55,7 +55,7 @@ async function init() {
 
   rtc.createOffer().then((offer) => {
     rtc.setLocalDescription(offer);
-    ws.send(JSON.stringify({ sdp: offer }));
+    ws.send({ sdp: offer });
   });
 
   // startButton.addEventListener("click", () => {
