@@ -25,7 +25,6 @@ async function init() {
   });
 
   rtc.ice$.subscribe((candidate) => {
-    console.log("ice", candidate);
     ws.send({ candidate });
   });
 

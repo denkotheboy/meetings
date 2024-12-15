@@ -24,6 +24,14 @@ export class RTC {
     this._peerConnection.ontrack = (event) => {
       this._stream$.next(event.streams);
     };
+
+    this._peerConnection.onconnectionstatechange = () => {
+      console.log("Connection State:", this._peerConnection.connectionState);
+    };
+
+    this._peerConnection.onicecandidateerror = (event) => {
+      console.error("ICE Candidate Error:", event);
+    };
   }
 
   createOffer(options?: RTCOfferOptions) {
