@@ -11,7 +11,15 @@ export class RTC {
 
   constructor() {
     this._peerConnection = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: [
+        {
+          urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302",
+            "stun:stun2.l.google.com:19302",
+          ],
+        },
+      ],
     });
 
     this._peerConnection.onicecandidate = (event) => {
@@ -31,6 +39,13 @@ export class RTC {
 
     this._peerConnection.onicecandidateerror = (event) => {
       console.error("ICE Candidate Error:", event);
+    };
+
+    this._peerConnection.oniceconnectionstatechange = () => {
+      console.log(
+        "ICE connection state:",
+        this._peerConnection.iceConnectionState,
+      );
     };
   }
 
