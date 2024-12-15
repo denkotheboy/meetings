@@ -25,7 +25,8 @@ async function init() {
   });
 
   rtc.ice$.subscribe((candidate) => {
-    ws.send(JSON.stringify({ candidate }));
+    console.log("ice", candidate);
+    ws.send({ candidate });
   });
 
   rtc.stream$.subscribe((stream) => {
@@ -34,19 +35,21 @@ async function init() {
 
   ws.messages$.subscribe(async (message) => {
     let data: any;
-    console.log(message);
+    console.log("message", message);
     if (typeof message === "string") {
       data = JSON.parse(message);
     } else if (message instanceof Blob) {
       data = JSON.parse(await message.text());
     }
 
+    console.log("data", data);
+
     if (data.sdp) {
       console.log("sdp", data.sdp);
-      rtc.setRemoteDescription(rtc.createRTCSessionDescription(data.sdp));
+      void rtc.setRemoteDescription(rtc.createRTCSessionDescription(data.sdp));
     } else if (data.candidate) {
       console.log("candidate", data.candidate);
-      rtc.addIceCandidate(rtc.createRTCIceCandidate(data.candidate));
+      void rtc.addIceCandidate(rtc.createRTCIceCandidate(data.candidate));
     }
   });
 
