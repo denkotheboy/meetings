@@ -79,7 +79,7 @@ func handleMessages() {
 		for client := range clients {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			err := client.Write(ctx, websocket.MessageText, msg)
+			err := client.Write(ctx, websocket.MessageBinary, msg)
 			if err != nil {
 				log.Println("Ошибка отправки сообщения:", err)
 				client.Close(websocket.StatusInternalError, "Ошибка отправки")
