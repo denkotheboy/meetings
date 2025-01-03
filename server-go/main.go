@@ -1,58 +1,115 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
-	"net"
+	"log"
+	"net/http"
 	"os"
+	"sync"
+	"time"
+
+	"github.com/coder/websocket"
 )
 
-func handleConnection(connection net.Conn, server *Server) {
-	server.addConnection(connection)
-	defer connection.Close()
-	defer server.removeConnection(connection)
+// Структура для сообщений
+type Message struct {
+	Type string `json:"type"` // Тип сообщения (offer, answer, candidate)
+	Data string `json:"data"` // Данные сообщения
+}
 
-	fmt.Println("Новое соединение:", connection.RemoteAddr())
+// Клиенты
+var clients = make(map[*websocket.Conn]bool)
+var broadcast = make(chan Message)
+var mu sync.Mutex
 
-	// Создаем буфер для чтения данных от клиента
-	buffer := make([]byte, 1024)
+func main() {
+	port := os.Getenv("PORT")
 
+	http.HandleFunc("/", handleWebSocket)
+
+	// Обработка сообщений
+	go handleMessages()
+
+	// Запуск HTTP-сервера
+	fmt.Println("Сигнальный сервер запущен на :%s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	// Обновление соединения до WebSocket
+	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
+		CompressionMode: websocket.CompressionDisabled,
+	})
+	if err != nil {
+		log.Println("Ошибка подключения WebSocket:", err)
+		return
+	}
+	defer conn.Close(websocket.StatusInternalError, "закрытие соединения")
+
+	// Регистрация клиента
+	mu.Lock()
+	clients[conn] = true
+	mu.Unlock()
+
+	log.Println("Клиент подключён:", r.RemoteAddr)
+
+	// Чтение сообщений
 	for {
-		n, err := connection.Read(buffer)
-		if err != nil {
-			fmt.Println("Клиент отключился:", connection.RemoteAddr())
-			return
+		var msg Message
+		err := readJSON(conn, &msg)
+		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
+			log.Println("Клиент отключился:", r.RemoteAddr)
+			break
+		} else if err != nil {
+			log.Println("Ошибка чтения сообщения:", err)
+			break
 		}
 
-		fmt.Print("Байты отправил")
-		data := buffer[:n]
+		// Отправка сообщения в канал
+		broadcast <- msg
+	}
 
-		server.broadcast(data, connection)
+	// Удаление клиента
+	mu.Lock()
+	delete(clients, conn)
+	mu.Unlock()
+}
+
+func handleMessages() {
+	for {
+		// Получаем сообщение из канала
+		msg := <-broadcast
+
+		// Рассылаем сообщение всем подключённым клиентам
+		mu.Lock()
+		for client := range clients {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			err := writeJSON(ctx, client, msg)
+			if err != nil {
+				log.Println("Ошибка отправки сообщения:", err)
+				client.Close(websocket.StatusInternalError, "Ошибка отправки")
+				delete(clients, client)
+			}
+		}
+		mu.Unlock()
 	}
 }
 
-func main() {
-	server := NewServer()
-
-	port := os.Getenv("PORT")
-
-	listener, err := net.Listen("tcp", ":" + port)
+func readJSON(conn *websocket.Conn, v interface{}) error {
+	_, data, err := conn.Read(context.Background())
 	if err != nil {
-		fmt.Println("Ошибка при создании сервера:", err)
-		return
+		return err
 	}
-	defer listener.Close()
+	return json.Unmarshal(data, v)
+}
 
-	fmt.Printf("Сервер запущен на порту %s...", port)
-
-	// Ожидаем подключения клиентов
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			fmt.Println("Ошибка при подключении клиента:", err)
-			continue
-		}
-
-		// Обрабатываем каждого клиента в отдельной горутине
-		go handleConnection(conn, server)
+func writeJSON(ctx context.Context, conn *websocket.Conn, v interface{}) error {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
 	}
+	return conn.Write(ctx, websocket.MessageText, data)
 }
