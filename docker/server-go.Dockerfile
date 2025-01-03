@@ -1,5 +1,5 @@
 # Для сборки
-FROM golang:1.23.4-alpine  AS builder
+FROM golang:1.23.4-alpine AS builder
 ARG PORT
 WORKDIR /app
 COPY ../server-go/go.mod ./
