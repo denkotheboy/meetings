@@ -23,6 +23,7 @@ func handleConnection(connection net.Conn, server *Server) {
 			return
 		}
 
+		fmt.Print("Байты отправил")
 		data := buffer[:n]
 
 		server.broadcast(data, connection)
