@@ -12,9 +12,14 @@ import (
 	"github.com/coder/websocket"
 )
 
+type Message struct {
+	Data   []byte
+	Sender *websocket.Conn
+}
+
 // Клиенты
 var clients = make(map[*websocket.Conn]bool)
-var broadcast = make(chan []byte)
+var broadcast = make(chan Message)
 var mu sync.Mutex
 
 func main() {
@@ -60,7 +65,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Отправка сообщения в канал
-		broadcast <- data
+		broadcast <- Message{Data: data, Sender: conn}
 	}
 
 	// Удаление клиента
@@ -73,18 +78,22 @@ func handleMessages() {
 	for {
 		// Получаем сообщение из канала
 		msg := <-broadcast
+		sender := msg.Sender
 
 		// Рассылаем сообщение всем подключённым клиентам
 		mu.Lock()
 		for client := range clients {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			err := client.Write(ctx, websocket.MessageBinary, msg)
-			if err != nil {
-				log.Println("Ошибка отправки сообщения:", err)
-				client.Close(websocket.StatusInternalError, "Ошибка отправки")
-				delete(clients, client)
+			if sender != client {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				err := client.Write(ctx, websocket.MessageBinary, msg.Data)
+				if err != nil {
+					log.Println("Ошибка отправки сообщения:", err)
+					client.Close(websocket.StatusInternalError, "Ошибка отправки")
+					delete(clients, client)
+				}
 			}
+
 		}
 		mu.Unlock()
 	}
