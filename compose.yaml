@@ -14,11 +14,21 @@ services:
       - server
       - coturn
 
+#  server:
+#    container_name: server
+#    build:
+#      context: .
+#      dockerfile: docker/server.Dockerfile
+#    expose:
+#      - "9000"
+#    environment:
+#      - PORT=9000
+
   server:
     container_name: server
     build:
       context: .
-      dockerfile: docker/server.Dockerfile
+      dockerfile: docker/server-go.Dockerfile
     expose:
       - "9000"
     environment:
